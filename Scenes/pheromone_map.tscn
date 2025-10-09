@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://c7i430mpyc155"]
+
+[ext_resource type="Script" path="res://Scripts/PheromoneMap.cs" id="1_j8uba"]
+[ext_resource type="Texture2D" uid="uid://jauhm35ukpsq" path="res://icon.svg" id="2_mk1ga"]
+[ext_resource type="Shader" path="res://Shaders/pheromone.gdshader" id="2_wvx4j"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mfcho"]
+shader = ExtResource("2_wvx4j")
+
+[node name="PheromoneMap" type="Node2D"]
+script = ExtResource("1_j8uba")
+
+[node name="Sprite2D" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_mfcho")
+offset_left = 1.0
+offset_top = 2.0
+offset_right = 175.0
+offset_bottom = 160.0
+scale = Vector2(6.63281, 4.09375)
+texture = ExtResource("2_mk1ga")

@@ -1,0 +1,13 @@
+Ant types:
+	Queen - Reproduction only. Lays all eggs.
+	Workers - Forage, feed larva, nest construction
+	Scout - Search for food
+	Soldier - Patrol, fight enemies
+
+Pheromone logic:
+	The nest emits a "colony scent" that dissapates in a radius around it.
+	When an ant is searching for food, it leaves a "searching" pheromone, and it follows a "found" pheromone if nearby.
+	When an ant has found food, it leaves a "found" pheromone, and it follows a "searching" pheromone if nearby.
+	When an ant (not soldier) encounters an enemy, it leaves an "alarm" pheromone, and flees toward any familiar pheromone in this order: "Colony scent", "found", "searching", or in a zig-zag random motion.
+	When a soldier ant encounters an enemy, it leaves an "alarm" pheromone, and starts attacking.
+	Soldier ants will always follow the strongest "alarm" pheromone nearby, and patrol the hive if no alarm pheromones is present.
