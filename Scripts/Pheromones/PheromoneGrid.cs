@@ -5,7 +5,7 @@ public partial class PheromoneGrid : Node
 {
 	public int Width { get; private set; } = 256;
 	public int Height { get; private set; } = 256;
-	private PheromoneCell[,] _grid;// = new PheromoneCell[10, 10];
+	private PheromoneCell[,] _grid;
 	[Signal] public delegate void PheromonesUpdatedEventHandler();
 
 	public override void _Ready()
@@ -13,81 +13,47 @@ public partial class PheromoneGrid : Node
 		_grid = new PheromoneCell[Width, Height];
 	}
 
-
-	public float GetColonyPheromoneLevel(int x, int y)
+	public float GetPheromoneLevel(int x, int y, PHEROMONE_TYPE type)
 	{
-		return _grid[x, y].colony;
-	}
+		if (x < 0 || x >= Width || y < 0 || y >= Height) return 0;
+        switch (type)
+        {
+			case PHEROMONE_TYPE.COLONY:
+				return _grid[x, y].colony;
+			case PHEROMONE_TYPE.SEARCHING:
+				return _grid[x, y].searching;
+			case PHEROMONE_TYPE.RETURNING:
+				return _grid[x, y].returning;
+			case PHEROMONE_TYPE.ALARM:
+				return _grid[x, y].alarm;
+			default: return _grid[x, y].colony;
+        }
+    }
 
-	public float GetAlarmPheromoneLevel(int x, int y)
-	{
-		return _grid[x, y].alarm;
-	}
-
-	public float GetSearchPheromoneLevel(int x, int y)
-	{
-		return _grid[x, y].search;
-	}
-
-	public float GetReturningPheromoneLevel(int x, int y)
-	{
-		return _grid[x, y].returning;
-	}
-
-	public void AddColonyPheromone(int x, int y, float value)
+	public void AddPheromone(int x, int y, float value, PHEROMONE_TYPE type)
 	{
 
 		if (x < 0 || x >= Width || y < 0 || y >= Height)
 		{
-			GD.PrintErr("Out of bounds");
+			//GD.PrintErr("Out of bounds");
 			return;
 		}
 		value = Mathf.Clamp(value, 0, 1);
-		_grid[x, y].colony += value;
-
-		EmitSignal(nameof(PheromonesUpdated));
-	}
-
-	public void AddSearchPheromone(int x, int y, float value)
-	{
-
-		if (x < 0 || x >= Width || y < 0 || y >= Height)
-		{
-			GD.PrintErr("Out of bounds");
-			return;
-		}
-		value = Mathf.Clamp(value, 0, 1);
-		_grid[x, y].search += value;
-
-		EmitSignal(nameof(PheromonesUpdated));
-	}
-
-	public void AddReturningPheromone(int x, int y, float value)
-	{
-
-		if (x < 0 || x >= Width || y < 0 || y >= Height)
-		{
-			GD.PrintErr("Out of bounds");
-			return;
-		}
-		value = Mathf.Clamp(value, 0, 1);
-		_grid[x, y].returning += value;
-
-		EmitSignal(nameof(PheromonesUpdated));
-	}
-
-	public void AddAlarmPheromone(int x, int y, float value)
-	{
-
-		if (x < 0 || x >= Width || y < 0 || y >= Height)
-		{
-			GD.PrintErr("Out of bounds");
-			return;
-		}
-		value = Mathf.Clamp(value, 0, 1);
-		_grid[x, y].alarm += value;
-
-		EmitSignal(nameof(PheromonesUpdated));
+		switch (type)
+        {
+            case PHEROMONE_TYPE.COLONY:
+				_grid[x, y].colony += value;
+				break;
+            case PHEROMONE_TYPE.SEARCHING:
+				_grid[x, y].searching += value;
+				break;
+            case PHEROMONE_TYPE.RETURNING:
+				_grid[x, y].returning += value;
+				break;
+            case PHEROMONE_TYPE.ALARM:
+				_grid[x, y].alarm += value;
+				break;
+        }
 	}
 
 	public void DiffuseRow(int row)
@@ -104,19 +70,45 @@ public partial class PheromoneGrid : Node
 	public void DiffuseGrid()
 	{
 		// We need to diffuse every other row and every other column to not get a chain reaction
-		int width = Width ;
-		int height = Height ;
+		int width = Width;
+		int height = Height;
 		PheromoneCell[,] gridClone = _grid.Clone() as PheromoneCell[,];
 		for (int i = 0; i < height; i++)
 		{
-			for (int j = 0; j < width; j ++)
+			for (int j = 0; j < width; j++)
 			{
 				DiffuseCell(j, i, ref gridClone);
-				//GD.Print("x: " + j + "    y: " + i);
 			}
 		}
 		_grid = gridClone;
 		EmitSignal(nameof(PheromonesUpdated));
+	}
+
+	int ii = 0;
+	int jj = 0;
+	public void DiffuseGridSlow(int loops)
+	{
+		// We need to diffuse every other row and every other column to not get a chain reaction
+		int width = Width ;
+		int height = Height ;
+		PheromoneCell[,] gridClone = _grid.Clone() as PheromoneCell[,];
+		for (int i = 0; i < loops; i++)
+		{
+			DiffuseCell(jj, ii, ref gridClone);
+
+			ii++;
+			if (ii >= width)
+			{
+				ii = 0;
+				jj++;
+				if (jj >= height)
+				{
+					jj = 0;
+					EmitSignal(nameof(PheromonesUpdated));
+				}
+			}
+		}
+		_grid = gridClone;
 	}
 
 	private void DiffuseCell(int x, int y, ref PheromoneCell[,] grid)
@@ -145,9 +137,9 @@ public partial class PheromoneGrid : Node
 		grid[x, y].colony  = Mathf.Clamp(diffused * (1 - colonyDecayRate), 0, 1); // Sets the new pheromone level between 0-1
 
 		// Diffuse search
-		average = (up.search + down.search + left.search + right.search)  * 0.25f; // Average with neighbours
-		diffused = Mathf.Lerp(center.search, average, searchDiffusionRate);
-		grid[x, y].search  = Mathf.Clamp(diffused * (1 - searchDecayRate), 0, 1); // Sets the new pheromone level between 0-1
+		average = (up.searching + down.searching + left.searching + right.searching)  * 0.25f; // Average with neighbours
+		diffused = Mathf.Lerp(center.searching, average, searchDiffusionRate);
+		grid[x, y].searching  = Mathf.Clamp(diffused * (1 - searchDecayRate), 0, 1); // Sets the new pheromone level between 0-1
 
 		// Diffuse returning
 		average = (up.returning + down.returning + left.returning + right.returning)  * 0.25f; // Average with neighbours

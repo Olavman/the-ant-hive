@@ -3,14 +3,22 @@ using System;
 
 public partial class PheromoneMap : Node
 {
-    public PheromoneGrid Grid = new PheromoneGrid();
+    public PheromoneGrid Grid;
     private ImageTexture pheromoneTexture;
     private Image pheromoneImage;
     private bool _isVisible = true;
 
+
+    public void Init(PheromoneGrid grid)
+    {
+        GD.Print("Init");
+        Grid = grid;
+    }
+
     public override void _Ready()
     {
-        Grid._Ready();
+        //Grid._Ready();
+        if (Grid == null) GD.Print("No Grid");
         Grid.PheromonesUpdated += OnPheromonesUpdated;
 
 
@@ -50,10 +58,10 @@ public partial class PheromoneMap : Node
         {
             for (int x = 0; x < width; x++)
             {
-                float colony = Grid.GetColonyPheromoneLevel(x, y);
-                float search = Grid.GetSearchPheromoneLevel(x, y);
-                float returning = Grid.GetReturningPheromoneLevel(x, y);
-                float alarm = Grid.GetAlarmPheromoneLevel(x, y);
+                float colony = Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.COLONY);
+                float search =  Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.SEARCHING);
+                float returning =  Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.RETURNING);
+                float alarm =  Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.ALARM);
 
                 // Combine all pheromones into RGBA channels
                 int index = (y * width + x) * 4;
@@ -75,18 +83,21 @@ public partial class PheromoneMap : Node
 
     public override void _Process(double delta)
     {
-
-            Grid.DiffuseGrid();
-            Grid.AddSearchPheromone((int)GetViewport().GetMousePosition()[0], (int)GetViewport().GetMousePosition()[1], 1);
-            Grid.AddColonyPheromone(50, 50, 1);
-            //Grid.AddAlarmPheromone(50, 50, 1);
+        int loops = (Grid.Width * Grid.Height) / 10;
+        Grid.DiffuseGridSlow(loops);
+        //Grid.DiffuseGrid();
+        Grid.AddPheromone((int)GetViewport().GetMousePosition()[0], (int)GetViewport().GetMousePosition()[1], 1, PHEROMONE_TYPE.SEARCHING);
+        Grid.AddPheromone(50, 50, 1, PHEROMONE_TYPE.COLONY);
+        //Grid.AddAlarmPheromone(50, 50, 1);
+        //Grid.EmitSignal(nameof(Grid.PheromonesUpdated));
     }
 
     public override void _UnhandledInput(InputEvent e)
     {
         if (e.IsActionPressed("add_colony_pheromone"))
         {
-            Grid.AddAlarmPheromone(Math.Abs((int)GD.Randi() % 100), Math.Abs((int)GD.Randi() % 100), 1);
+            Grid.AddPheromone(Math.Abs((int)GD.Randi() % 100), Math.Abs((int)GD.Randi() % 100), 1, PHEROMONE_TYPE.ALARM);
+            Grid.EmitSignal(nameof(Grid.PheromonesUpdated));
         }
         if (e.IsActionPressed("diffuse_pheromone")) Grid.DiffuseGrid();
     }
