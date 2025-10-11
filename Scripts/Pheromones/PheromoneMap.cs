@@ -1,6 +1,7 @@
 using Godot;
 using System;
 
+// Visual representation of pheromones
 public partial class PheromoneMap : Node
 {
     public PheromoneGrid Grid;
@@ -11,7 +12,6 @@ public partial class PheromoneMap : Node
 
     public void Init(PheromoneGrid grid)
     {
-        GD.Print("Init");
         Grid = grid;
     }
 
@@ -41,7 +41,7 @@ public partial class PheromoneMap : Node
     public void ToggleVisibility()
     {
         _isVisible = !_isVisible;
-        
+
         if (_isVisible) UpdatePheromoneTexture();
     }
 
@@ -59,16 +59,19 @@ public partial class PheromoneMap : Node
             for (int x = 0; x < width; x++)
             {
                 float colony = Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.COLONY);
-                float search =  Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.SEARCHING);
-                float returning =  Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.RETURNING);
-                float alarm =  Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.ALARM);
+                float search = Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.SEARCHING);
+                float returning = Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.RETURNING);
+                float alarm = Grid.GetPheromoneLevel(x, y, PHEROMONE_TYPE.ALARM);
 
                 // Combine all pheromones into RGBA channels
                 int index = (y * width + x) * 4;
                 pixels[index + 0] = (byte)(Mathf.Clamp(alarm + colony * 0.5f, 0, 1) * 255);
-                pixels[index + 1] = (byte)(Mathf.Clamp(search + colony * 0.5f, 0, 1) * 255);
-                pixels[index + 2] = (byte)(Mathf.Clamp(returning, 0, 1) * 255);
-                pixels[index + 3] = 255;
+                pixels[index + 1] = (byte)(Mathf.Clamp(returning, 0, 1) * 255);
+                pixels[index + 2] = (byte)(Mathf.Clamp(search + colony * 0.5f, 0, 1) * 255);
+                //pixels[3] = 255;
+                // Calculate total pheromone strength for alpha
+                float totalStrength = alarm + search + returning + colony;
+                pixels[index + 3] = (byte)(Mathf.Clamp(totalStrength, 0, 1) * 255);
             }
         }
 
@@ -86,8 +89,7 @@ public partial class PheromoneMap : Node
         int loops = (Grid.Width * Grid.Height) / 10;
         Grid.DiffuseGridSlow(loops);
         //Grid.DiffuseGrid();
-        Grid.AddPheromone((int)GetViewport().GetMousePosition()[0], (int)GetViewport().GetMousePosition()[1], 1, PHEROMONE_TYPE.SEARCHING);
-        Grid.AddPheromone(50, 50, 1, PHEROMONE_TYPE.COLONY);
+        Grid.AddPheromone((int)GetViewport().GetMousePosition()[0], (int)GetViewport().GetMousePosition()[1], 1, PHEROMONE_TYPE.RETURNING);
         //Grid.AddAlarmPheromone(50, 50, 1);
         //Grid.EmitSignal(nameof(Grid.PheromonesUpdated));
     }
@@ -96,7 +98,7 @@ public partial class PheromoneMap : Node
     {
         if (e.IsActionPressed("add_colony_pheromone"))
         {
-            Grid.AddPheromone(Math.Abs((int)GD.Randi() % 100), Math.Abs((int)GD.Randi() % 100), 1, PHEROMONE_TYPE.ALARM);
+            Grid.AddPheromone(Math.Abs((int)GD.Randi() % 740), Math.Abs((int)GD.Randi() % 480), 1, PHEROMONE_TYPE.ALARM);
             Grid.EmitSignal(nameof(Grid.PheromonesUpdated));
         }
         if (e.IsActionPressed("diffuse_pheromone")) Grid.DiffuseGrid();

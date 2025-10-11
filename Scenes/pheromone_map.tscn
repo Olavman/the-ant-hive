@@ -12,9 +12,9 @@ script = ExtResource("1_j8uba")
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_mfcho")
-offset_left = 1.0
-offset_top = 2.0
-offset_right = 175.0
-offset_bottom = 160.0
+offset_right = 174.0
+offset_bottom = 158.0
 scale = Vector2(6.63281, 4.09375)
+size_flags_horizontal = 4
+size_flags_vertical = 4
 texture = ExtResource("2_mk1ga")

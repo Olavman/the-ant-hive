@@ -1,32 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://dsvlee2g0kdmv"]
+[gd_scene load_steps=5 format=3 uid="uid://dsvlee2g0kdmv"]
 
-[ext_resource type="PackedScene" uid="uid://bs6b7tnmggmv4" path="res://Scenes/hive_entrance.tscn" id="1_acbv7"]
 [ext_resource type="Script" path="res://Scripts/Game.cs" id="1_emifk"]
-[ext_resource type="Script" path="res://Scripts/Pheromones/PheromoneGrid.cs" id="3_4subp"]
 [ext_resource type="PackedScene" uid="uid://c7i430mpyc155" path="res://Scenes/pheromone_map.tscn" id="4_8p8tw"]
-[ext_resource type="Shader" path="res://Shaders/pheromone.gdshader" id="4_edgbf"]
-[ext_resource type="Texture2D" uid="uid://jauhm35ukpsq" path="res://icon.svg" id="5_w02qu"]
 [ext_resource type="PackedScene" uid="uid://cd2fkatnk3bws" path="res://Scenes/fps_counter.tscn" id="7_ovv4p"]
 [ext_resource type="PackedScene" uid="uid://qi1vhohilyo6" path="res://Scenes/ant.tscn" id="8_7tc7p"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_lphfi"]
-shader = ExtResource("4_edgbf")
 
 [node name="Game" type="Node"]
 script = ExtResource("1_emifk")
 AntScene = ExtResource("8_7tc7p")
 MapScene = ExtResource("4_8p8tw")
-
-[node name="Hive entrance" parent="." instance=ExtResource("1_acbv7")]
-position = Vector2(557, 295)
-script = ExtResource("3_4subp")
-
-[node name="TextureRect" type="Sprite2D" parent="."]
-visible = false
-material = SubResource("ShaderMaterial_lphfi")
-position = Vector2(498, 237)
-scale = Vector2(4.88281, 3.47656)
-texture = ExtResource("5_w02qu")
 
 [node name="FpsCounter" parent="." instance=ExtResource("7_ovv4p")]
 anchors_preset = 1
