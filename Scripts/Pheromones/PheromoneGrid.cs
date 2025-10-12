@@ -1,28 +1,35 @@
 using Godot;
 using System;
+using System.Runtime.CompilerServices;
 
 // Pheromone data and logic
 public partial class PheromoneGrid : Node
 {
-	public int Width { get; private set; } = 720;
-	public int Height { get; private set; } = 480;
+	public int Width { get; private set; }
+	public int Height { get; private set; }
 	private PheromoneCell[,] _grid;
 	[Signal] public delegate void PheromonesUpdatedEventHandler();
 
 	// Higher number = spread faster
-	const float colonyDiffusionRate = 0.2f;
-	const float searchDiffusionRate = 0.1f;
-	const float returningDiffusionRate = 0.15f;
+	const float colonyDiffusionRate = 0.1f;
+	const float searchDiffusionRate = 0.01f;
+	const float returningDiffusionRate = 0.2f;
 	const float alarmDiffusionRate = 0.5f;
 
 	// Higher number = decay faster
-	const float colonyDecayRate = 0.001f;
+	const float colonyDecayRate = 0.00001f;
 	const float searchDecayRate = 0.001f;
-	const float returningDecayRate = 0.0005f;
-	const float alarmDecayRate = 0.00001f;
+	const float returningDecayRate = 0.05f;
+	const float alarmDecayRate = 0.0001f;
 
-	public void Init()
+	//public static readonly Vector4 DiffusionRates = new Vector4(0.2f, 0.1f, 0.15f, 0.5f); // Colony, Searching, Returning, Alarm
+	//public static readonly Vector4 DecayRates = new Vector4(0.001f, 0.001f, 0.0005f, 0.00001f); // Colony, Searching, Returning, Alarm
+	//public static readonly Vector4 DecayOffset = new Vector4(0.001f, 0.001f, 0.001f, 0.001f); // Colony, Searching, Returning, Alarm
+
+	public void Init(int width, int height)
 	{
+		Width = width;
+		Height = height;
 		_grid = new PheromoneCell[Width, Height];
 	}
 
@@ -33,13 +40,18 @@ public partial class PheromoneGrid : Node
 		{
 			case PHEROMONE_TYPE.COLONY:
 				return _grid[x, y].colony;
+				//return _grid[x, y].PheromoneValues.X;
 			case PHEROMONE_TYPE.SEARCHING:
 				return _grid[x, y].searching;
+				//return _grid[x, y].PheromoneValues.Y;
 			case PHEROMONE_TYPE.RETURNING:
 				return _grid[x, y].returning;
+				//return _grid[x, y].PheromoneValues.Z;
 			case PHEROMONE_TYPE.ALARM:
 				return _grid[x, y].alarm;
+				//return _grid[x, y].PheromoneValues.W;
 			default: return _grid[x, y].colony;
+			//default: return _grid[x, y].PheromoneValues.X;
 		}
 	}
 
@@ -56,15 +68,19 @@ public partial class PheromoneGrid : Node
 		{
 			case PHEROMONE_TYPE.COLONY:
 				_grid[x, y].colony += value;
+				//_grid[x, y].PheromoneValues.X += value;
 				break;
 			case PHEROMONE_TYPE.SEARCHING:
 				_grid[x, y].searching += value;
+				//_grid[x, y].PheromoneValues.Y += value;
 				break;
 			case PHEROMONE_TYPE.RETURNING:
 				_grid[x, y].returning += value;
+				//_grid[x, y].PheromoneValues.Z += value;
 				break;
 			case PHEROMONE_TYPE.ALARM:
 				_grid[x, y].alarm += value;
+				//_grid[x, y].PheromoneValues.W += value;
 				break;
 		}
 	}
@@ -115,32 +131,58 @@ public partial class PheromoneGrid : Node
 
 	private void DiffuseCell(int x, int y, ref PheromoneCell[,] grid)
 	{
-
+		
 		PheromoneCell center = _grid[x, y];
 		PheromoneCell up = _grid[x, Math.Max(0, y - 1)];
 		PheromoneCell down = _grid[x, Math.Min(Height - 1, y + 1)];
 		PheromoneCell left = _grid[Math.Max(0, x - 1), y];
 		PheromoneCell right = _grid[Math.Min(Width - 1, x + 1), y];
-
+		
 		// Diffuse colony
 		float average = (up.colony + down.colony + left.colony + right.colony) * 0.25f; // Average with neighbours
 		float diffused = Mathf.Lerp(center.colony, average, colonyDiffusionRate);
-		grid[x, y].colony = Mathf.Clamp(diffused * (1 - colonyDecayRate) - 0.001f, 0, 1); // Sets the new pheromone level between 0-1
+		float result = Mathf.Clamp(diffused * (1 - colonyDecayRate), 0, 1);
+		if (result < 0.0001f) result = 0;
+		grid[x, y].colony = result; // Sets the new pheromone level between 0-1
+		//grid[x, y].colony = diffused * (1 - colonyDecayRate) - 0.001f; // Sets the new pheromone level between 0-1
 
 		// Diffuse search
 		average = (up.searching + down.searching + left.searching + right.searching) * 0.25f; // Average with neighbours
 		diffused = Mathf.Lerp(center.searching, average, searchDiffusionRate);
-		grid[x, y].searching = Mathf.Clamp(diffused * (1 - searchDecayRate) - 0.001f, 0, 1); // Sets the new pheromone level between 0-1
+		result = Mathf.Clamp(diffused * (1 - searchDecayRate), 0, 1);
+		if (result < 0.0001f) result = 0;
+		grid[x, y].searching = result; // Sets the new pheromone level between 0-1
+		//grid[x, y].searching = diffused * (1 - searchDecayRate) - 0.001f; // Sets the new pheromone level between 0-1
 
 		// Diffuse returning
 		average = (up.returning + down.returning + left.returning + right.returning) * 0.25f; // Average with neighbours
 		diffused = Mathf.Lerp(center.returning, average, returningDiffusionRate);
-		grid[x, y].returning = Mathf.Clamp(diffused * (1 - returningDecayRate) - 0.001f, 0, 1); // Sets the new pheromone level between 0-1
+		result = Mathf.Clamp(diffused * (1 - returningDecayRate), 0, 1);
+		if (result < 0.0001f) result = 0;
+		grid[x, y].returning = result; // Sets the new pheromone level between 0-1
+		//grid[x, y].returning = diffused * (1 - returningDecayRate) - 0.00001f; // Sets the new pheromone level between 0-1
 
 		// Diffuse alarm
 		average = (up.alarm + down.alarm + left.alarm + right.alarm) * 0.25f; // Average with neighbours
 		diffused = Mathf.Lerp(center.alarm, average, alarmDiffusionRate);
-		grid[x, y].alarm = Mathf.Clamp(diffused * (1 - alarmDecayRate) - 0.001f, 0, 1); // Sets the new pheromone level between 0-1
+		result = Mathf.Clamp(diffused * (1 - alarmDecayRate), 0, 1);
+		if (result < 0.0001f) result = 0;
+		grid[x, y].alarm = result; // Sets the new pheromone level between 0-1
+		//grid[x, y].alarm = diffused * (1 - alarmDecayRate) - 0.00001f; // Sets the new pheromone level between 0-1
+		
+		
+		
+/*
+		Vector4 center = 	grid[x, 							y].PheromoneValues;
+		Vector4 up = 		grid[x, 							Math.Max(0, y - 1)].PheromoneValues;
+		Vector4 down = 		grid[x, 							Math.Min(Height - 1, y + 1)].PheromoneValues;
+		Vector4 left = 		grid[Math.Max(0, x - 1), 			y].PheromoneValues;
+		Vector4 right = 	grid[Math.Min(Width - 1, x + 1), 	y].PheromoneValues;
 
+		Vector4 average = (up + down + left + right) * 0.25f;
+		Vector4 diffused = center +(average - center) * DiffusionRates;
+		Vector4 result = diffused * (Vector4.One - DecayRates) - DecayOffset;
+
+		grid[x, y].PheromoneValues = result.Clamp(Vector4.Zero, Vector4.One);*/
 	}
 }

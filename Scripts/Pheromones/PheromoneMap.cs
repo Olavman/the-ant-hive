@@ -52,6 +52,7 @@ public partial class PheromoneMap : Node
         int height = Grid.Height;
 
         byte[] pixels = new byte[width * height * 4];
+        int amplification = 3000;
 
         // Write grid data to image
         for (int y = 0; y < height; y++)
@@ -65,13 +66,13 @@ public partial class PheromoneMap : Node
 
                 // Combine all pheromones into RGBA channels
                 int index = (y * width + x) * 4;
-                pixels[index + 0] = (byte)(Mathf.Clamp(alarm + colony * 0.5f, 0, 1) * 255);
-                pixels[index + 1] = (byte)(Mathf.Clamp(returning, 0, 1) * 255);
-                pixels[index + 2] = (byte)(Mathf.Clamp(search + colony * 0.5f, 0, 1) * 255);
+                pixels[index + 0] = (byte)(Mathf.Clamp(alarm + colony * 0.5f, 0, 1) * amplification);
+                pixels[index + 1] = (byte)(Mathf.Clamp(returning, 0, 1) * amplification);
+                pixels[index + 2] = (byte)(Mathf.Clamp(search + colony * 0.5f, 0, 1) * amplification);
                 //pixels[3] = 255;
                 // Calculate total pheromone strength for alpha
                 float totalStrength = alarm + search + returning + colony;
-                pixels[index + 3] = (byte)(Mathf.Clamp(totalStrength, 0, 1) * 255);
+                pixels[index + 3] = (byte)(Mathf.Clamp(totalStrength, 0, 1) * amplification);
             }
         }
 
@@ -88,19 +89,5 @@ public partial class PheromoneMap : Node
     {
         int loops = (Grid.Width * Grid.Height) / 10;
         Grid.DiffuseGridSlow(loops);
-        //Grid.DiffuseGrid();
-        Grid.AddPheromone((int)GetViewport().GetMousePosition()[0], (int)GetViewport().GetMousePosition()[1], 1, PHEROMONE_TYPE.RETURNING);
-        //Grid.AddAlarmPheromone(50, 50, 1);
-        //Grid.EmitSignal(nameof(Grid.PheromonesUpdated));
-    }
-
-    public override void _UnhandledInput(InputEvent e)
-    {
-        if (e.IsActionPressed("add_colony_pheromone"))
-        {
-            Grid.AddPheromone(Math.Abs((int)GD.Randi() % 740), Math.Abs((int)GD.Randi() % 480), 1, PHEROMONE_TYPE.ALARM);
-            Grid.EmitSignal(nameof(Grid.PheromonesUpdated));
-        }
-        if (e.IsActionPressed("diffuse_pheromone")) Grid.DiffuseGrid();
     }
 }

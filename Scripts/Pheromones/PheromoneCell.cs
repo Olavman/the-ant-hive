@@ -14,5 +14,6 @@ public struct PheromoneCell
     public float searching;
     public float returning;
     public float alarm;
+    //public Vector4 PheromoneValues; // X=colony, Y=searching, Z=returning, W=alarm
 
 } 

@@ -8,12 +8,14 @@ public enum ANT_TYPE
     QUEEN
 }
 public enum ANT_STATE
-    {
-        SEARCHING,
-        RETURNING,
-        FLEEING,
+{
+    IDLE,
+    SEARCHING,
+    RETURNING,
+    FLEEING,
+    FOUND_HOME
+}
 
-    }
 public struct Ant
 {
     public ANT_TYPE Type;
