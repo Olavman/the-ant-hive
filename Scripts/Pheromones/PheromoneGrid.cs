@@ -11,15 +11,15 @@ public partial class PheromoneGrid : Node
 	[Signal] public delegate void PheromonesUpdatedEventHandler();
 
 	// Higher number = spread faster
-	const float colonyDiffusionRate = 0.1f;
+	const float colonyDiffusionRate = 1.0f;
 	const float searchDiffusionRate = 0.01f;
-	const float returningDiffusionRate = 0.2f;
+	const float returningDiffusionRate = 0.01f;
 	const float alarmDiffusionRate = 0.5f;
 
 	// Higher number = decay faster
-	const float colonyDecayRate = 0.00001f;
+	const float colonyDecayRate = 0.000001f;
 	const float searchDecayRate = 0.001f;
-	const float returningDecayRate = 0.05f;
+	const float returningDecayRate = 0.01f;
 	const float alarmDecayRate = 0.0001f;
 
 	//public static readonly Vector4 DiffusionRates = new Vector4(0.2f, 0.1f, 0.15f, 0.5f); // Colony, Searching, Returning, Alarm

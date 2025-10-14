@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://dsvlee2g0kdmv"]
+[gd_scene load_steps=7 format=3 uid="uid://dsvlee2g0kdmv"]
 
 [ext_resource type="Script" path="res://Scripts/Game.cs" id="1_emifk"]
 [ext_resource type="PackedScene" uid="uid://c7i430mpyc155" path="res://Scenes/pheromone_map.tscn" id="4_8p8tw"]
+[ext_resource type="PackedScene" uid="uid://cxh7qwm7ommh0" path="res://Scenes/food_map.tscn" id="4_25ffb"]
 [ext_resource type="PackedScene" uid="uid://85w43rk7c1ns" path="res://Scenes/ant_renderer.tscn" id="4_d63bp"]
 [ext_resource type="PackedScene" uid="uid://cd2fkatnk3bws" path="res://Scenes/fps_counter.tscn" id="7_ovv4p"]
 [ext_resource type="PackedScene" uid="uid://qi1vhohilyo6" path="res://Scenes/ant.tscn" id="8_7tc7p"]
@@ -9,7 +10,8 @@
 [node name="Game" type="Node"]
 script = ExtResource("1_emifk")
 AntScene = ExtResource("8_7tc7p")
-MapScene = ExtResource("4_8p8tw")
+PheromoneMapScene = ExtResource("4_8p8tw")
+FoodMapScene = ExtResource("4_25ffb")
 AntRendererScene = ExtResource("4_d63bp")
 
 [node name="FpsCounter" parent="." instance=ExtResource("7_ovv4p")]

@@ -42,7 +42,15 @@ public partial class PheromoneMap : Node
     {
         _isVisible = !_isVisible;
 
-        if (_isVisible) UpdatePheromoneTexture();
+        if (_isVisible)
+        {
+            GetNode<TextureRect>("Sprite2D").Visible = true;
+            UpdatePheromoneTexture();
+        }
+        else
+        {
+            GetNode<TextureRect>("Sprite2D").Visible = false;
+        }
     }
 
 
@@ -52,7 +60,7 @@ public partial class PheromoneMap : Node
         int height = Grid.Height;
 
         byte[] pixels = new byte[width * height * 4];
-        int amplification = 3000;
+        int amplification = 255;
 
         // Write grid data to image
         for (int y = 0; y < height; y++)
@@ -89,5 +97,13 @@ public partial class PheromoneMap : Node
     {
         int loops = (Grid.Width * Grid.Height) / 10;
         Grid.DiffuseGridSlow(loops);
+    }
+    public override void _UnhandledInput(InputEvent e)
+    {
+
+        if (e.IsActionPressed("toggle_pheromones"))
+        {
+            ToggleVisibility();
+        }
     }
 }
