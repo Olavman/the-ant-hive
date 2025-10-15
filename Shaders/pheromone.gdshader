@@ -8,9 +8,9 @@ void fragment() {
 	float colony = pheromones.r +pheromones.g;
 	float alarm = pheromones.r;
 	float returning = pheromones.g;
-	float search = pheromones.b;
+	float search = pheromones.r;
 
-	vec4 color = vec4(colony +alarm, colony + returning, search, pheromones.a);
+	vec4 color = vec4(colony +alarm +search, colony + returning, alarm, pheromones.a);
 	COLOR = color;//color1 +color2 +color3 +color4;
 }
 

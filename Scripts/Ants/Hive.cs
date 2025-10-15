@@ -18,6 +18,7 @@ public partial class Hive : Node2D
     {
         GlobalPosition = pos;
         _pheromoneGrid = pheromoneGrid;
+        _pheromoneGrid.SetHivePos(pos);
         _foodGrid = foodGrid;
         AntLogic.OnFoodReturned += OnFoodReturned;
 

@@ -8,6 +8,7 @@ public partial class PheromoneGrid : Node
 	public int Width { get; private set; }
 	public int Height { get; private set; }
 	private PheromoneCell[,] _grid;
+	private Vector2 _hivePos;
 	[Signal] public delegate void PheromonesUpdatedEventHandler();
 
 	// Higher number = spread faster
@@ -18,8 +19,8 @@ public partial class PheromoneGrid : Node
 
 	// Higher number = decay faster
 	const float colonyDecayRate = 0.000001f;
-	const float searchDecayRate = 0.001f;
-	const float returningDecayRate = 0.01f;
+	const float searchDecayRate = 0.005f;
+	const float returningDecayRate = 0.025f;
 	const float alarmDecayRate = 0.0001f;
 
 	//public static readonly Vector4 DiffusionRates = new Vector4(0.2f, 0.1f, 0.15f, 0.5f); // Colony, Searching, Returning, Alarm
@@ -32,6 +33,16 @@ public partial class PheromoneGrid : Node
 		Height = height;
 		_grid = new PheromoneCell[Width, Height];
 	}
+
+	public Vector2 GetHivePos()
+	{
+		return _hivePos;
+	}
+	
+	public void SetHivePos(Vector2 pos)
+    {
+		_hivePos = pos;
+    }
 
 	public float GetPheromoneLevel(int x, int y, PHEROMONE_TYPE type)
 	{
