@@ -9,7 +9,7 @@ public partial class Hive : Node2D
     private FoodGrid _foodGrid;
     private Ant[] _ants;
 
-    private int _foodCount = 10000;
+    private float _foodCount = 100;
     private float _updateTimer = 0f;
     private const float _updateInterval = 0.0005f;
     private float _updatePercentage = 0.1f; // 1 = 100%
@@ -24,26 +24,6 @@ public partial class Hive : Node2D
 
         int antCount = 10000;
         _ants = new Ant[antCount];
-        /*
-        for (int i = 0; i < antCount; i++)
-        {
-            Ant ant = new Ant();
-            if (i < 1000)
-            {
-                ant.Type = ANT_TYPE.SCOUT;
-                ant.State = ANT_STATE.SEARCHING;
-            }
-            else
-            {
-                ant.Type = ANT_TYPE.WORKER;
-                ant.State = ANT_STATE.IDLE;
-            }
-            ant.Velocity = new Vector2(GD.Randf() * 2 - 1, GD.Randf() * 2 - 1);
-            ant.Pos = new Vector2(GlobalPosition.X, GlobalPosition.Y);
-            ant.Speed = 10 + GD.Randf() * 2;
-
-            _ants[i] = ant;
-        } */
     }
 
     private void OnFoodReturned(int amount)
@@ -54,6 +34,11 @@ public partial class Hive : Node2D
             _foodCount -= 10;
             SpawnAnt();
         }
+    }
+
+    private void OnAntReturned(ref Ant ant)
+    {
+        
     }
     
     private void SpawnAnt()
@@ -78,7 +63,7 @@ public partial class Hive : Node2D
 
     public override void _Process(double delta)
     {
-        _pheromoneGrid.AddPheromone((int)GlobalPosition.X, (int)GlobalPosition.Y, 1, PHEROMONE_TYPE.COLONY); // Colony pheromone will be replaced with return pheromone later on.
+        _pheromoneGrid.AddPheromone((int)GlobalPosition.X, (int)GlobalPosition.Y, 0.2f, PHEROMONE_TYPE.RETURNING); // Colony pheromone will be replaced with return pheromone later on.
 
         // Update ant logic on a fixed interval
         _updateTimer += (float)delta;

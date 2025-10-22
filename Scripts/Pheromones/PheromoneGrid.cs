@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 // Pheromone data and logic
 public partial class PheromoneGrid : Node
@@ -8,6 +9,9 @@ public partial class PheromoneGrid : Node
 	public int Width { get; private set; }
 	public int Height { get; private set; }
 	private PheromoneCell[,] _grid;
+	private List<Vector2> _activeCells = new List<Vector2>();
+	private HashSet<Vector2> _activeSet = new HashSet<Vector2>(); // Avoid duplicates
+	private float _activeThreshold = 0.001f;
 	private Vector2 _hivePos;
 	[Signal] public delegate void PheromonesUpdatedEventHandler();
 
@@ -51,20 +55,33 @@ public partial class PheromoneGrid : Node
 		{
 			case PHEROMONE_TYPE.COLONY:
 				return _grid[x, y].colony;
-				//return _grid[x, y].PheromoneValues.X;
+			//return _grid[x, y].PheromoneValues.X;
 			case PHEROMONE_TYPE.SEARCHING:
 				return _grid[x, y].searching;
-				//return _grid[x, y].PheromoneValues.Y;
+			//return _grid[x, y].PheromoneValues.Y;
 			case PHEROMONE_TYPE.RETURNING:
 				return _grid[x, y].returning;
-				//return _grid[x, y].PheromoneValues.Z;
+			//return _grid[x, y].PheromoneValues.Z;
 			case PHEROMONE_TYPE.ALARM:
 				return _grid[x, y].alarm;
-				//return _grid[x, y].PheromoneValues.W;
+			//return _grid[x, y].PheromoneValues.W;
 			default: return _grid[x, y].colony;
-			//default: return _grid[x, y].PheromoneValues.X;
+				//default: return _grid[x, y].PheromoneValues.X;
 		}
 	}
+	
+	public float GetTotalPheromoneLevel(int x, int y)
+	{
+		if (x < 0 || x >= Width || y < 0 || y >= Height) return 0;
+
+		float value = 0;
+		value += _grid[x, y].colony;
+		value += _grid[x, y].searching;
+		value += _grid[x, y].returning;
+		value += _grid[x, y].alarm;
+
+		return value;
+    }
 
 	public void AddPheromone(int x, int y, float value, PHEROMONE_TYPE type)
 	{
@@ -94,7 +111,69 @@ public partial class PheromoneGrid : Node
 				//_grid[x, y].PheromoneValues.W += value;
 				break;
 		}
+
+		// Mark cell and it's neighbours as active
+		int xx = x;
+		int yy = y;
+		if (GetTotalPheromoneLevel(xx, yy) > _activeThreshold && _activeSet.Add(new Vector2(xx, yy)))
+		{
+			_activeCells.Add(new Vector2(xx, yy));
+		}
+		if (GetTotalPheromoneLevel(xx - 1, yy) > _activeThreshold && _activeSet.Add(new Vector2(xx - 1, yy)))
+		{
+			_activeCells.Add(new Vector2(xx - 1, yy));
+		}
+		if (GetTotalPheromoneLevel(xx + 1, yy) > _activeThreshold && _activeSet.Add(new Vector2(xx + 1, yy)))
+		{
+			_activeCells.Add(new Vector2(xx + 1, yy));
+		}
+		if (GetTotalPheromoneLevel(xx, yy - 1) > _activeThreshold && _activeSet.Add(new Vector2(xx, yy - 1)))
+		{
+			_activeCells.Add(new Vector2(xx, yy - 1));
+		}
+		if (GetTotalPheromoneLevel(xx, yy + 1) > _activeThreshold && _activeSet.Add(new Vector2(xx, yy + 1)))
+		{
+			_activeCells.Add(new Vector2(xx, yy + 1));
+		}
 	}
+
+	public void DiffuseActiveCells()
+	{
+		var newActive = new HashSet<Vector2>();
+
+		foreach (Vector2 pos in _activeCells)
+		{
+			int x = (int)pos.X;
+			int y = (int)pos.Y;
+
+			// Diffuse and decay this cell
+			DiffuseCell(x, y, ref _grid);
+
+			// If its still active, keep it
+			if (GetTotalPheromoneLevel(x, y) > _activeThreshold)
+			{
+				newActive.Add(pos);
+			}
+
+			// Check neighbours
+			foreach (Vector2 neighbour in GetNeighbours(x, y))
+			{
+				if (GetTotalPheromoneLevel((int)neighbour.X, (int)neighbour.Y) > _activeThreshold)
+				{
+					newActive.Add(neighbour);
+				}
+			}
+		}
+		
+	}
+	
+	IEnumerable<Vector2> GetNeighbours(int x, int y)
+    {
+		yield return new Vector2(x, Math.Max(0, y - 1));
+		yield return new Vector2(x, Math.Min(Height - 1, y + 1));
+		yield return new Vector2(Math.Max(0, x - 1), y);
+		yield return new Vector2(Math.Min(Width - 1, x + 1), y);
+    }
 
 	public void DiffuseGrid()
 	{

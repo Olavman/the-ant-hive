@@ -30,9 +30,9 @@ public partial class Game : Node
 		//AddChild(foodRenderer);
 
 		// Hive
-		Vector2 hivePos = new Vector2(_pheromoneGrid.Width / 2, _pheromoneGrid.Height / 2);
+		Vector2 hivePos = new Vector2(50, 50);
 		_hive.Init(hivePos, _pheromoneGrid, _foodGrid);
-		_hive.GlobalPosition = new Vector2(_pheromoneGrid.Width/2, _pheromoneGrid.Height/2);
+		_hive.GlobalPosition = hivePos;
 		AddChild(_hive);
 
 		// Ant renderer
@@ -61,7 +61,15 @@ public partial class Game : Node
 	private void OnTimerTimout()
 	{
 		//ant.Update();
+		//_pheromoneGrid.EmitSignal(nameof(_pheromoneGrid.PheromonesUpdated));
 	}
+    public override void _Process(double delta)
+	{
+		 int loops = (_pheromoneGrid.Width * _pheromoneGrid.Height) / 10;
+		 _pheromoneGrid.DiffuseGridSlow(loops);
+
+		// _pheromoneGrid.DiffuseActiveCells();
+    }
 
 	public override void _UnhandledInput(InputEvent e)
     {

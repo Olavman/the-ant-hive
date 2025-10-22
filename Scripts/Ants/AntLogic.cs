@@ -55,13 +55,18 @@ public static class AntLogic
 	{
 		ant.WanderTimer = 0;
 		ant.HomeVector = Vector2.Zero; // Point home
-		GD.Print("Returned home. Start searching");
+									   //GD.Print("Returned home. Start searching");
 		if (ant.HasFood)
 		{
 			OnFoodReturned?.Invoke(1);
 			ant.HasFood = false;
 			ant.Velocity *= -1;
 		}
+		else
+        {
+            
+			OnFoodReturned?.Invoke(0);
+        }
 		ant.State = ANT_STATE.SEARCHING;
 		return;
 	

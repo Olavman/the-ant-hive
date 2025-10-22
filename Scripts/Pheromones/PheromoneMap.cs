@@ -8,6 +8,7 @@ public partial class PheromoneMap : Node
     private ImageTexture pheromoneTexture;
     private Image pheromoneImage;
     private bool _isVisible = true;
+	private Timer _timer;
 
 
     public void Init(PheromoneGrid grid)
@@ -30,7 +31,20 @@ public partial class PheromoneMap : Node
         pheromoneTexture = ImageTexture.CreateFromImage(pheromoneImage);
 
         UpdatePheromoneTexture();
+
+        // Create and configure timer
+        _timer = new Timer();
+        _timer.WaitTime = 0.1f; // 0.5 seconds
+        _timer.Timeout += OnTimerTimout;
+        AddChild(_timer);
+        _timer.Start();
     }
+    private void OnTimerTimout()
+    {
+        //ant.Update();
+        //_pheromoneGrid.EmitSignal(nameof(_pheromoneGrid.PheromonesUpdated));
+        //OnPheromonesUpdated();
+	}
 
     private void OnPheromonesUpdated()
     {
@@ -93,11 +107,6 @@ public partial class PheromoneMap : Node
         material.SetShaderParameter("pheromone_map", pheromoneTexture);
     }
 
-    public override void _Process(double delta)
-    {
-        int loops = (Grid.Width * Grid.Height) / 10;
-        Grid.DiffuseGridSlow(loops);
-    }
     public override void _UnhandledInput(InputEvent e)
     {
 
