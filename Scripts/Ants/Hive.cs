@@ -9,7 +9,7 @@ public partial class Hive : Node2D
     private FoodGrid _foodGrid;
     private Ant[] _ants;
 
-    private float _foodCount = 100;
+    private float _foodCount = 10000;
     private float _updateTimer = 0f;
     private const float _updateInterval = 0.0005f;
     private float _updatePercentage = 0.1f; // 1 = 100%
